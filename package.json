@@ -1,29 +1,20 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Real-time anomaly detection service consuming the TealVue mock market feed",
+  "main": "src/index.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "loadtest": "node scripts/loadtest.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "axios": "^1.18.1",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.5.2",
-    "helmet": "^8.2.0",
-    "moment": "^2.30.1",
-    "morgan": "^1.11.0",
-    "socket.io-client": "^4.8.3",
-    "uuid": "^14.0.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
   }
 }

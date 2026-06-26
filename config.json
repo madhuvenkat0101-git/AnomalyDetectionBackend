@@ -1,0 +1,24 @@
+{
+  "_comment": "Per-symbol anomaly-detection config. Hot-reloadable: edit and save, no restart needed.",
+  "feed": {
+    "url": "https://mock-data.tealvue.in",
+    "restBase": "https://mock-data.tealvue.in/api/v1",
+    "subscribeEvent": "subscribe",
+    "tickEvents": ["tick", "ticker", "price", "trade", "quote", "data"]
+  },
+  "burst": {
+    "liveCadenceGapMs": 400,
+    "minWarmupSamples": 5,
+    "maxBurstMs": 15000
+  },
+  "alerts": {
+    "maxStored": 200,
+    "cooldownSec": 30
+  },
+  "symbols": {
+    "RELIANCE": { "strategy": "spike", "thresholdPercent": 3, "windowSec": 30 },
+    "TCS":      { "strategy": "movingAverage", "deviationPercent": 5, "sampleSize": 10 },
+    "INFY":     { "strategy": "spike", "thresholdPercent": 2.5, "windowSec": 20 },
+    "HDFCBANK": { "strategy": "movingAverage", "deviationPercent": 4, "sampleSize": 15 }
+  }
+}
