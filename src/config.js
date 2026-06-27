@@ -7,9 +7,7 @@ const logger = require('./logger');
 
 const CONFIG_PATH = path.join(__dirname, '..', 'config.json');
 
-// Loads config.json and hot-reloads it on change (bonus requirement).
-// Emits 'change' with the new config so the rest of the system can react
-// without a restart.
+
 class ConfigStore extends EventEmitter {
   constructor(filePath = CONFIG_PATH) {
     super();

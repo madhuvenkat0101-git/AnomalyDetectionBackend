@@ -5,12 +5,6 @@ const { createStrategy } = require('./strategies');
 const { newAlertRef } = require('../alerts/alertRef');
 const logger = require('../logger');
 
-// Per-symbol detection with three guarantees the brief cares about:
-//  1. Windows use SIMULATED time (tick.ts), not wall-clock.
-//  2. The initial replay BURST warms rolling state but emits NO alerts, so the
-//     burst never produces a storm of false alerts. A symbol flips to "live"
-//     when its inter-tick WALL-CLOCK gap reaches live cadence (or a hard cap).
-//  3. Cooldown de-dups repeated alerts for the same symbol/strategy/direction.
 class DetectionEngine extends EventEmitter {
   constructor(configStore) {
     super();
@@ -26,8 +20,6 @@ class DetectionEngine extends EventEmitter {
     );
   }
 
-  // Resolve config for a symbol, including synthetic scale symbols (FOO-SIM07),
-  // which inherit the base symbol's strategy config.
   _configFor(symbol) {
     const direct = this.cfg.symbols[symbol];
     if (direct) return direct;
@@ -47,23 +39,18 @@ class DetectionEngine extends EventEmitter {
         firstWall: 0,
         lastWall: 0,
         liveTimer: null,
-        burstTickCount: 0, // how many ticks arrived before this symbol went live —
-                            // this is the number the README/walkthrough asks for
-        cooldowns: new Map(), // key -> last sim ts (ms)
+        burstTickCount: 0, 
+        cooldowns: new Map(), 
       };
       this.state.set(symbol, st);
     }
     return st;
   }
 
-  // Shared by both ways a symbol can transition from burst to live (see
-  // process() below) so the burst-tick count is always logged exactly once,
-  // regardless of which path triggers it first.
+  
   _goLive(st, symbol, now) {
     st.live = true;
-    // INFO level deliberately (not debug) — this is the exact number the
-    // assignment brief asks you to report in the README: "roughly how many
-    // burst ticks arrived when you first subscribed to RELIANCE."
+
     logger.info('burst finished, symbol now live', {
       symbol,
       burstTicks: st.burstTickCount,
@@ -88,11 +75,7 @@ class DetectionEngine extends EventEmitter {
         this._goLive(st, tick.symbol, now);
       }
     }
-    // Fallback: if the stream pauses (burst drained) and no further tick
-    // arrives to trigger the gap check above, this timer flips us live on
-    // its own — e.g. right at the very end of a burst with nothing after it.
-    // It shares the same _goLive() path so the burst-tick count still gets
-    // logged here too, not silently skipped.
+    
     clearTimeout(st.liveTimer);
     st.liveTimer = setTimeout(() => {
       if (!st.live) this._goLive(st, tick.symbol, Date.now());

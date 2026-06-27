@@ -62,6 +62,19 @@ Edit and save this file while the service is running — it hot-reloads (see
   "simTime": "2026-05-04T06:00:15.000Z",
   "detectedAt": "2026-06-26T05:02:11.301Z"
 }
+
+{
+   "alertRef": "TV-B00A8E45",
+   "symbol": "RELIANCE",
+   "strategy": "spike",
+   "direction": "spike",
+   "reason": "Price spiked +0.45% (from 1432.8 to 1439.3) within 30s window",
+   "price": 1439.3,
+   "changePercent": 0.45,
+   "ts": 1782547080000,
+   "simTime": "2026-06-27T07:58:00.000Z",
+   "detectedAt": "2026-06-27T05:50:49.785Z"
+        },
 ```
 
 ## How the initial burst is handled (no false-alert storm)
@@ -89,9 +102,6 @@ Together: correctness comes from simulated-time windowing; the *suppression*
 of burst-era alerts is an extra layer of protection so you never see an alert
 fire mid-burst even in edge cases.
 
-> **TODO before submitting:** from your own terminal output on first
-> subscribing to RELIANCE, note roughly how many burst ticks arrived before
-> live cadence kicked in. Paste that number here.
 
 ## Scaling to 1,000+ streams (honest)
 

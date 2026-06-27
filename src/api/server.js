@@ -8,17 +8,7 @@ const rateLimit = require('express-rate-limit');
 const { Server } = require('socket.io');
 const logger = require('../logger');
 
-// HTTP API + live Socket.IO broadcast.
-//
-// SECURITY (the brief leaves the exact bar open and asks us to justify a choice):
-// Threat model — this is an internal/operator alerts feed, not a public site. The
-// realistic risks are (a) unauthenticated scraping of alert data and (b) cheap
-// request floods. So we apply, in layers:
-//   1. A required API key (constant-time compared) on the /api/alerts data route.
-//   2. Per-IP rate limiting to blunt brute-force / abuse.
-//   3. No secrets in responses; /health is intentionally public and minimal.
-// This is proportionate; mTLS/OAuth would be over-engineering for a single
-// internal consumer. Swap the key check for a gateway/JWT if it ever goes public.
+
 class ApiServer {
   constructor({ port, apiKey, alertStore }) {
     this.port = port;
@@ -45,13 +35,6 @@ class ApiServer {
   _routes() {
     this.app.disable('x-powered-by');
 
-    // CORS for plain HTTP routes (separate from the Socket.IO server's own
-    // CORS config above — Socket.IO's `cors` option only covers the
-    // WebSocket handshake, it does NOT cover Express's HTTP routes).
-    // Without this, the browser sends a preflight OPTIONS request for the
-    // custom `x-api-key` header, gets no Access-Control-Allow-Origin back,
-    // and blocks the real GET before our code ever runs - which is exactly
-    // the "CORS error" / "Failed to fetch" seen on /api/alerts.
     this.app.use(
       cors({
         origin: '*',

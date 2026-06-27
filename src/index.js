@@ -15,8 +15,7 @@ function main() {
   const configStore = new ConfigStore();
   const cfg = configStore.get();
 
-  // API key: required. If absent, generate an ephemeral one and print it so the
-  // service never starts wide-open by accident.
+
   let apiKey = process.env.API_KEY;
   if (!apiKey) {
     apiKey = crypto.randomBytes(24).toString('hex');

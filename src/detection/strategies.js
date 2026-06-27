@@ -1,11 +1,5 @@
 'use strict';
 
-// Each strategy keeps its own rolling state and exposes:
-//   update(price, ts) -> { triggered, direction, reason, pct } | { triggered:false }
-//   size()            -> number of samples held (for warmup gating)
-// `ts` is SIMULATED time in epoch ms. Windows are measured in simulated time.
-
-// Spike/drop: alert if price moves more than X% within a window of Y seconds.
 class SpikeStrategy {
   constructor({ thresholdPercent, windowSec }) {
     this.threshold = thresholdPercent;
@@ -44,8 +38,6 @@ class SpikeStrategy {
   size() { return this.buf.length; }
 }
 
-// Moving-average deviation: alert if price is more than ±Z% from the rolling
-// average of the previous N samples. Uses a fixed-size ring buffer + running sum.
 class MovingAverageStrategy {
   constructor({ deviationPercent, sampleSize }) {
     this.deviation = deviationPercent;

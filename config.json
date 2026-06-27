@@ -16,7 +16,7 @@
     "cooldownSec": 30
   },
   "symbols": {
-    "RELIANCE": { "strategy": "spike", "thresholdPercent": 3, "windowSec": 30 },
+    "RELIANCE": { "strategy": "spike", "thresholdPercent": 0.05, "windowSec": 30 },
     "TCS":      { "strategy": "movingAverage", "deviationPercent": 5, "sampleSize": 10 },
     "INFY":     { "strategy": "spike", "thresholdPercent": 2.5, "windowSec": 20 },
     "HDFCBANK": { "strategy": "movingAverage", "deviationPercent": 4, "sampleSize": 15 }

@@ -1,6 +1,5 @@
 'use strict';
 
-// Minimal structured logger. Keeps deps light; swap for pino in production.
 function line(level, msg, meta) {
   const rec = { t: new Date().toISOString(), level, msg };
   if (meta) rec.meta = meta;

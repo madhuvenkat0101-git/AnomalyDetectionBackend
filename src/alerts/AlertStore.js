@@ -1,7 +1,6 @@
 'use strict';
 
-// Bounded in-memory ring buffer of the most recent alerts.
-// O(1) append, O(limit) read. Newest-first on read.
+
 class AlertStore {
   constructor(maxStored = 200) {
     this.max = maxStored;

@@ -1,13 +1,5 @@
 'use strict';
 
-// Standalone scale/throughput harness — NO network. It drives the real
-// DetectionEngine with synthetic ticks to measure how the detection pipeline
-// holds up under many concurrent symbol streams. This is explicitly a benchmark
-// of OUR pipeline, not of the TealVue feed.
-//
-// Usage: node scripts/loadtest.js [numSymbols] [ticksPerSymbol]
-//   e.g. node scripts/loadtest.js 1000 200
-
 const { DetectionEngine } = require('../src/detection/DetectionEngine');
 
 const numSymbols = Number(process.argv[2]) || 1000;

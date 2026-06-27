@@ -1,21 +1,10 @@
 'use strict';
 
-// api_docs.md documents the "ticker" event payload explicitly, e.g.:
-//   { "SYMBOL": "RELIANCE", "LTP": 2465.75, "TS": "2026-05-04 11:30:15+05:30", ... }
-// Field names are UPPERCASE. JS object key lookup is case-sensitive, so
-// obj['symbol'] on a payload shaped like obj.SYMBOL returns undefined - that
-// silently dropped every real tick (the original bug). We match the
-// documented uppercase names first, and keep a few lowercase fallbacks in
-// case the feed ever changes casing, but we look keys up case-insensitively
-// so this can't silently regress the same way again.
 const SYMBOL_KEYS = ['SYMBOL', 'symbol', 'sym', 's', 'ticker', 'instrument', 'scrip'];
 const PRICE_KEYS = ['LTP', 'ltp', 'price', 'last', 'lastPrice', 'p', 'close', 'c', 'value'];
 const TS_KEYS = ['TS', 'ts', 'timestamp', 'time', 't', 'epoch', 'simTime', 'simTimestamp'];
 
-// Case-insensitive lookup: build a lowercase-keyed index of the payload once,
-// then match candidate keys against it lowercased. This protects us even if
-// the feed's casing ever shifts again - we no longer depend on getting the
-// exact case right.
+
 function pick(obj, keys) {
   const lowerMap = {};
   for (const k of Object.keys(obj)) lowerMap[k.toLowerCase()] = obj[k];
@@ -37,9 +26,6 @@ function toEpochMs(raw) {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-// Returns { symbol, price, ts, raw } or null if the payload is not a usable tick.
-// `ts` is the SIMULATED time of the tick (epoch ms); detection windows use this,
-// not wall-clock.
 function normalizeTick(payload) {
   let obj = payload;
   if (Array.isArray(payload)) obj = payload[0];

@@ -5,12 +5,6 @@ const { io } = require('socket.io-client');
 const { normalizeTick } = require('./normalizeTick');
 const logger = require('../logger');
 
-// Owns the Socket.IO connection to the TealVue mock feed.
-//   - connect with automatic reconnection (socket.io handles backoff)
-//   - (re)subscribe to configured symbols on every (re)connect
-//   - capture ticks regardless of exact event name (onAny) and normalize them
-//   - re-emit clean 'tick' events: { symbol, price, ts, raw }
-// It knows nothing about anomaly detection (single responsibility).
 class FeedClient extends EventEmitter {
   constructor(feedConfig) {
     super();
@@ -52,8 +46,6 @@ class FeedClient extends EventEmitter {
       logger.warn('feed connect_error', { err: err.message });
     });
 
-    // Capture every inbound event. Acks/status events are dropped by the
-    // normalizer (no symbol+price); real ticks for subscribed symbols pass through.
     this.socket.onAny((event, ...args) => {
       for (const payload of args) {
         const tick = normalizeTick(payload);
@@ -66,18 +58,6 @@ class FeedClient extends EventEmitter {
     return this;
   }
 
-  // CRITICAL FIX: api_docs.md documents two things that combine into a bug
-  // if ignored:
-  //   1. The subscribe payload format is `string[]` (an array), not a bare
-  //      string.
-  //   2. "Dynamic Single-Symbol Switching: Overwrites any prior subscription
-  //      on the connection state instantly" - meaning a SECOND subscribe
-  //      call replaces the first, it does not add to it.
-  // The old code looped and called socket.emit('subscribe', symbol) once
-  // per symbol with a bare string payload - each call silently overwrote
-  // the previous one, so only the LAST symbol in the loop ever ended up
-  // actually subscribed, and even that one was sent in the wrong shape.
-  // The fix: ONE subscribe call, with an array containing every symbol.
   _subscribeAll() {
     if (this.symbols.size === 0) return;
     const evt = this.cfg.subscribeEvent || 'subscribe';

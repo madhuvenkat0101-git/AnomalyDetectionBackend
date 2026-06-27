@@ -2,14 +2,6 @@
 
 const logger = require('../logger');
 
-// SCALE CHECK (honest simulation).
-// The real TealVue feed serves only ~35 symbols, so it cannot by itself prove
-// the pipeline survives 1,000+ concurrent streams. This fans each REAL tick out
-// into `factor` SYNTHETIC shadow symbols, suffixed `-SIMnn`, with a small
-// deterministic price perturbation. These are clearly NOT the real feed (the
-// suffix makes that explicit in every alert and log line). The detection engine
-// treats each shadow symbol as an independent stream, so total concurrent
-// streams = realSymbols * (1 + factor).
 class ScaleFanout {
   constructor(factor, engine) {
     this.factor = Math.max(0, factor | 0);
