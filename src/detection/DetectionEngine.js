@@ -47,11 +47,28 @@ class DetectionEngine extends EventEmitter {
         firstWall: 0,
         lastWall: 0,
         liveTimer: null,
+        burstTickCount: 0, // how many ticks arrived before this symbol went live —
+                            // this is the number the README/walkthrough asks for
         cooldowns: new Map(), // key -> last sim ts (ms)
       };
       this.state.set(symbol, st);
     }
     return st;
+  }
+
+  // Shared by both ways a symbol can transition from burst to live (see
+  // process() below) so the burst-tick count is always logged exactly once,
+  // regardless of which path triggers it first.
+  _goLive(st, symbol, now) {
+    st.live = true;
+    // INFO level deliberately (not debug) — this is the exact number the
+    // assignment brief asks you to report in the README: "roughly how many
+    // burst ticks arrived when you first subscribed to RELIANCE."
+    logger.info('burst finished, symbol now live', {
+      symbol,
+      burstTicks: st.burstTickCount,
+      burstDurationMs: now - st.firstWall,
+    });
   }
 
   process(tick) {
@@ -65,15 +82,21 @@ class DetectionEngine extends EventEmitter {
     // --- burst vs live detection (wall-clock based) ---
     if (st.firstWall === 0) st.firstWall = now;
     if (!st.live) {
+      st.burstTickCount += 1;
       const gap = st.lastWall ? now - st.lastWall : 0;
       if (gap >= bc.liveCadenceGapMs || now - st.firstWall >= bc.maxBurstMs) {
-        st.live = true;
-        logger.debug('symbol live', { symbol: tick.symbol });
+        this._goLive(st, tick.symbol, now);
       }
     }
-    // Fallback: if the stream pauses (burst drained), next tick is live.
+    // Fallback: if the stream pauses (burst drained) and no further tick
+    // arrives to trigger the gap check above, this timer flips us live on
+    // its own — e.g. right at the very end of a burst with nothing after it.
+    // It shares the same _goLive() path so the burst-tick count still gets
+    // logged here too, not silently skipped.
     clearTimeout(st.liveTimer);
-    st.liveTimer = setTimeout(() => { st.live = true; }, bc.liveCadenceGapMs);
+    st.liveTimer = setTimeout(() => {
+      if (!st.live) this._goLive(st, tick.symbol, Date.now());
+    }, bc.liveCadenceGapMs);
     if (st.liveTimer.unref) st.liveTimer.unref();
     st.lastWall = now;
 
